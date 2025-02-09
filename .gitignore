@@ -1,52 +1,325 @@
-# http://www.gnu.org/software/automake
+from fpdf import FPDF
+import random
 
-Makefile.in
-/ar-lib
-/mdate-sh
-/py-compile
-/test-driver
-/ylwrap
-.deps/
-.dirstamp
+# Lista de nombres (para asignación equitativa)
+nombres = ["Lorena Velázquez", "Lorena Granados", "Sergio Ramírez", "Diego Velázquez"]
 
-# http://www.gnu.org/software/autoconf
+# Frases motivadoras
+frases_motivadoras = [
+    "¡Manos a la obra, familia, que el hogar se limpia solo con amor!",
+    "Cada tarea es un paso para un hogar mejor. ¡Dale con todo!",
+    "¡A limpiar se ha dicho, que la unión hace la fuerza!",
+    "Recuerda, un hogar limpio es un hogar feliz. ¡Vamos por ello!",
+    "Cada esfuerzo cuenta, ¡súmale al equipo!",
+    "¡El trabajo en equipo transforma nuestro espacio en un santuario!"
+]
 
-autom4te.cache
-/autoscan.log
-/autoscan-*.log
-/aclocal.m4
-/compile
-/config.cache
-/config.guess
-/config.h.in
-/config.log
-/config.status
-/config.sub
-/configure
-/configure.scan
-/depcomp
-/install-sh
-/missing
-/stamp-h1
+# Tareas originales organizadas por categoría
+tareas = {
+    "Todos los días": [
+        "Hacer las camas", 
+        "Fregar platos", 
+        "Limpiar vitro y microondas (si se han utilizado)",
+        "Limpiar inodoros", 
+        "Barrer y fregar", 
+        "Poner una lavadora", 
+        "Tender y doblar ropa (si fuera necesario)",
+        "Recoger enredos", 
+        "Sacar la basura"
+    ],
+    "Lunes - Salón/Comedor": [
+        "Recoger desorden", 
+        "Limpiar polvo/muebles/mesas", 
+        "Aspirar sofás/sillones/sillas",
+        "Lavar fundas y cojines", 
+        "Barrer, fregar y perfumar"
+    ],
+    "Martes - Dormitorios/Habitaciones": [
+        "Guardar ropa/recoger desorden", 
+        "Limpiar polvo/muebles", 
+        "Aspirar alfombras",
+        "Cambiar ropa de cama", 
+        "Barrer, fregar y perfumar"
+    ],
+    "Miércoles - Cuartos de Baño": [
+        "Recoger desorden", 
+        "Limpiar piezas de todo el aseo", 
+        "Mampara, bañera, lavabo, espejos, azulejos, WC, escobilla del WC, bidé",
+        "Limpiar polvo/muebles", 
+        "Cambiar toallas y alfombrillas", 
+        "Barrer, fregar y perfumar"
+    ],
+    "Jueves - Cocina (Parte derecha)": [
+        "Recoger desorden", 
+        "Limpiar y ordenar despensa a la mitad de los armarios", 
+        "Muebles, campana, vitro",
+        "Sillas, mesa de la cocina", 
+        "Limpiar cubo de la basura", 
+        "Cambiar bayetas y estropajos",
+        "Barrer, fregar y perfumar"
+    ],
+    "Viernes": [
+        "Entrada, pasillo, recibidor, puertas", 
+        "Ventanas y rodapiés", 
+        "Pomos y manivelas",
+        "Zonas de ocio o trabajo (Despachos si los hubiera)", 
+        "Comederos, juguetes y mantitas de mis can-hijos",
+        "Recoger desorden", 
+        "Limpiar polvo", 
+        "Barrer, fregar y perfumar"
+    ],
+    "Sábado": [
+        "Ley de los 3 minutos", 
+        "Hacer lista de la compra semanal", 
+        "Pensar en las comidas de la semana",
+        "Regar las plantas y orden de jardín"
+    ],
+    "Domingo - Cocina (Parte izquierda)": [
+        "Recoger desorden", 
+        "Limpiar encimera", 
+        "Fregadero", 
+        "Lavavajillas", 
+        "Ventanales",
+        "Limpiar y ordenar despensa a la mitad de los armarios y muebles", 
+        "Cambiar bayetas y estropajos",
+        "Barrer, fregar y perfumar"
+    ]
+}
 
-# https://www.gnu.org/software/libtool/
+# Mapeo de días de la semana a la categoría de tareas (para notas diarias)
+dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+mapeo_dias = {
+    "Lunes": "Lunes - Salón/Comedor",
+    "Martes": "Martes - Dormitorios/Habitaciones",
+    "Miércoles": "Miércoles - Cuartos de Baño",
+    "Jueves": "Jueves - Cocina (Parte derecha)",
+    "Viernes": "Viernes",
+    "Sábado": "Sábado",
+    "Domingo": "Domingo - Cocina (Parte izquierda)"
+}
 
-/ltmain.sh
+# Actividades adicionales a incorporar (se asignarán a dos días distintos)
+actividades_adicionales = [
+    "Limpiar desechos de mascotas y cambiar",
+    "Limpiar patio a fondo entre dos personas"
+]
+# Seleccionar dos días distintos (sin repetir) para asignar las actividades extra
+dias_extra = random.sample(dias, 2)
+asignacion_extra = { dias_extra[0]: actividades_adicionales[0],
+                     dias_extra[1]: actividades_adicionales[1] }
 
-# http://www.gnu.org/software/texinfo
+# Crear PDF con estilo "nota"
+pdf = FPDF()
+pdf.set_auto_page_break(auto=True, margin=15)
 
-/texinfo.tex
+# Para cada día de la semana, generar una nota
+for dia in dias:
+    pdf.add_page()
+    
+    # Dibujar un rectángulo que simule el borde de la nota
+    # (x, y, ancho, alto); se usa un margen de 10 mm en cada lado.
+    pdf.set_draw_color(0, 0, 0)
+    pdf.rect(10, 10, pdf.w - 20, pdf.h - 20)
+    
+    # Encabezado de la nota: Día
+    pdf.set_xy(15, 15)
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, f"Día: {dia}", ln=True)
+    
+    # Compilar lista de tareas para el día:
+    # Se toman las de "Todos los días" + las específicas para ese día
+    lista_tareas = tareas["Todos los días"][:]
+    if mapeo_dias[dia] in tareas:
+        lista_tareas += tareas[mapeo_dias[dia]]
+    
+    # Si este día fue seleccionado para actividad extra, agregarla
+    if dia in asignacion_extra:
+        lista_tareas.append(asignacion_extra[dia])
+    
+    # Mezclar aleatoriamente las tareas para variar el orden
+    random.shuffle(lista_tareas)
+    
+    # Asignar nombres de manera equitativa: se baraja la lista de nombres y se asigna en ciclo
+    nombres_orden = random.sample(nombres, len(nombres))
+    
+    pdf.ln(5)
+    pdf.set_font("Arial", size=12)
+    # Listar las tareas con el nombre asignado
+    for i, tarea in enumerate(lista_tareas):
+        asignado = nombres_orden[i % len(nombres_orden)]
+        # Se utiliza "->" en lugar de la flecha para evitar problemas de codificación
+        pdf.cell(0, 8, f"- {tarea} -> {asignado}", ln=True)
+    
+    # Agregar una frase motivadora al final (elegida al azar)
+    frase = random.choice(frases_motivadoras)
+    pdf.ln(10)
+    pdf.set_font("Arial", "I", 12)
+    pdf.cell(0, 10, frase, ln=True, align="C")
 
-# http://www.gnu.org/software/m4/
+# Guardar el PDF en un archivo
+pdf_path = "/mnt/data/Notas_Limpieza_Familiar.pdf"
+pdf.output(pdf_path)
 
-m4/libtool.m4
-m4/ltoptions.m4
-m4/ltsugar.m4
-m4/ltversion.m4
-m4/lt~obsolete.m4
+pdf_pathfrom fpdf import FPDF
+import random
 
-# Generated Makefile
-# (meta build system like autotools,
-# can automatically generate from config.status script
-# (which is called by configure script))
-Makefile
+# Lista de nombres (para asignación equitativa)
+nombres = ["Lorena Velázquez", "Lorena Granados", "Sergio Ramírez", "Diego Velázquez"]
+
+# Frases motivadoras
+frases_motivadoras = [
+    "¡Manos a la obra, familia, que el hogar se limpia solo con amor!",
+    "Cada tarea es un paso para un hogar mejor. ¡Dale con todo!",
+    "¡A limpiar se ha dicho, que la unión hace la fuerza!",
+    "Recuerda, un hogar limpio es un hogar feliz. ¡Vamos por ello!",
+    "Cada esfuerzo cuenta, ¡súmale al equipo!",
+    "¡El trabajo en equipo transforma nuestro espacio en un santuario!"
+]
+
+# Tareas originales organizadas por categoría
+tareas = {
+    "Todos los días": [
+        "Hacer las camas", 
+        "Fregar platos", 
+        "Limpiar vitro y microondas (si se han utilizado)",
+        "Limpiar inodoros", 
+        "Barrer y fregar", 
+        "Poner una lavadora", 
+        "Tender y doblar ropa (si fuera necesario)",
+        "Recoger enredos", 
+        "Sacar la basura"
+    ],
+    "Lunes - Salón/Comedor": [
+        "Recoger desorden", 
+        "Limpiar polvo/muebles/mesas", 
+        "Aspirar sofás/sillones/sillas",
+        "Lavar fundas y cojines", 
+        "Barrer, fregar y perfumar"
+    ],
+    "Martes - Dormitorios/Habitaciones": [
+        "Guardar ropa/recoger desorden", 
+        "Limpiar polvo/muebles", 
+        "Aspirar alfombras",
+        "Cambiar ropa de cama", 
+        "Barrer, fregar y perfumar"
+    ],
+    "Miércoles - Cuartos de Baño": [
+        "Recoger desorden", 
+        "Limpiar piezas de todo el aseo", 
+        "Mampara, bañera, lavabo, espejos, azulejos, WC, escobilla del WC, bidé",
+        "Limpiar polvo/muebles", 
+        "Cambiar toallas y alfombrillas", 
+        "Barrer, fregar y perfumar"
+    ],
+    "Jueves - Cocina (Parte derecha)": [
+        "Recoger desorden", 
+        "Limpiar y ordenar despensa a la mitad de los armarios", 
+        "Muebles, campana, vitro",
+        "Sillas, mesa de la cocina", 
+        "Limpiar cubo de la basura", 
+        "Cambiar bayetas y estropajos",
+        "Barrer, fregar y perfumar"
+    ],
+    "Viernes": [
+        "Entrada, pasillo, recibidor, puertas", 
+        "Ventanas y rodapiés", 
+        "Pomos y manivelas",
+        "Zonas de ocio o trabajo (Despachos si los hubiera)", 
+        "Comederos, juguetes y mantitas de mis can-hijos",
+        "Recoger desorden", 
+        "Limpiar polvo", 
+        "Barrer, fregar y perfumar"
+    ],
+    "Sábado": [
+        "Ley de los 3 minutos", 
+        "Hacer lista de la compra semanal", 
+        "Pensar en las comidas de la semana",
+        "Regar las plantas y orden de jardín"
+    ],
+    "Domingo - Cocina (Parte izquierda)": [
+        "Recoger desorden", 
+        "Limpiar encimera", 
+        "Fregadero", 
+        "Lavavajillas", 
+        "Ventanales",
+        "Limpiar y ordenar despensa a la mitad de los armarios y muebles", 
+        "Cambiar bayetas y estropajos",
+        "Barrer, fregar y perfumar"
+    ]
+}
+
+# Mapeo de días de la semana a la categoría de tareas (para notas diarias)
+dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+mapeo_dias = {
+    "Lunes": "Lunes - Salón/Comedor",
+    "Martes": "Martes - Dormitorios/Habitaciones",
+    "Miércoles": "Miércoles - Cuartos de Baño",
+    "Jueves": "Jueves - Cocina (Parte derecha)",
+    "Viernes": "Viernes",
+    "Sábado": "Sábado",
+    "Domingo": "Domingo - Cocina (Parte izquierda)"
+}
+
+# Actividades adicionales a incorporar (se asignarán a dos días distintos)
+actividades_adicionales = [
+    "Limpiar desechos de mascotas y cambiar",
+    "Limpiar patio a fondo entre dos personas"
+]
+# Seleccionar dos días distintos (sin repetir) para asignar las actividades extra
+dias_extra = random.sample(dias, 2)
+asignacion_extra = { dias_extra[0]: actividades_adicionales[0],
+                     dias_extra[1]: actividades_adicionales[1] }
+
+# Crear PDF con estilo "nota"
+pdf = FPDF()
+pdf.set_auto_page_break(auto=True, margin=15)
+
+# Para cada día de la semana, generar una nota
+for dia in dias:
+    pdf.add_page()
+    
+    # Dibujar un rectángulo que simule el borde de la nota
+    # (x, y, ancho, alto); se usa un margen de 10 mm en cada lado.
+    pdf.set_draw_color(0, 0, 0)
+    pdf.rect(10, 10, pdf.w - 20, pdf.h - 20)
+    
+    # Encabezado de la nota: Día
+    pdf.set_xy(15, 15)
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, f"Día: {dia}", ln=True)
+    
+    # Compilar lista de tareas para el día:
+    # Se toman las de "Todos los días" + las específicas para ese día
+    lista_tareas = tareas["Todos los días"][:]
+    if mapeo_dias[dia] in tareas:
+        lista_tareas += tareas[mapeo_dias[dia]]
+    
+    # Si este día fue seleccionado para actividad extra, agregarla
+    if dia in asignacion_extra:
+        lista_tareas.append(asignacion_extra[dia])
+    
+    # Mezclar aleatoriamente las tareas para variar el orden
+    random.shuffle(lista_tareas)
+    
+    # Asignar nombres de manera equitativa: se baraja la lista de nombres y se asigna en ciclo
+    nombres_orden = random.sample(nombres, len(nombres))
+    
+    pdf.ln(5)
+    pdf.set_font("Arial", size=12)
+    # Listar las tareas con el nombre asignado
+    for i, tarea in enumerate(lista_tareas):
+        asignado = nombres_orden[i % len(nombres_orden)]
+        # Se utiliza "->" en lugar de la flecha para evitar problemas de codificación
+        pdf.cell(0, 8, f"- {tarea} -> {asignado}", ln=True)
+    
+    # Agregar una frase motivadora al final (elegida al azar)
+    frase = random.choice(frases_motivadoras)
+    pdf.ln(10)
+    pdf.set_font("Arial", "I", 12)
+    pdf.cell(0, 10, frase, ln=True, align="C")
+
+# Guardar el PDF en un archivo
+pdf_path = "/mnt/data/Notas_Limpieza_Familiar.pdf"
+pdf.output(pdf_path)
+
+pdf_path
